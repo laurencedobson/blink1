@@ -496,6 +496,36 @@ namespace ThingM.Blink1
             return new Blink1Preset((ushort)millisecond, new Rgb(red, green, blue));
         }
 
+		/// <summary>
+		/// Set the active LED number. 0 = Both, 1 = Top Only, 2 = Bottom Only.
+		/// </summary>
+		/// <param name="ledno"
+		/// The LED number to be set active.
+		/// </param>
+		/// <returns>
+		/// True if the LED value was set successfully.
+		/// </returns>
+		public bool SetLEDNumber(uint ledno)
+		{
+			if (ledno < 0 || ledno > 2)
+			{
+				throw new ArgumentOutOfRangeException("ledno", string.Format("Valid LED numbers are 0-{0} inclusively.", 2));
+			}
+
+			if (this.IsConnected == false)
+			{
+				throw new InvalidOperationException("No Blink(1) device connected.");
+			}
+
+			byte[] buffers = new byte[this.hidDevice.Capabilities.FeatureReportByteLength];
+
+			buffers[0] = Convert.ToByte(1);
+			buffers[1] = Convert.ToByte('l');
+			buffers[2] = Convert.ToByte(ledno);
+
+			return this.hidDevice.WriteFeatureData(buffers);
+		}
+
         /// <summary>
         /// Save a preset in the Blink(1) device, so it can be played back at a later time.
         /// </summary>
